@@ -1,6 +1,5 @@
 import numpy as np
 from typing import List, Tuple
-from body import Body
 
 class InvalidTimeStepError(ValueError):
     """Exception raised when an invalid timestep is provided to the simulation."""
