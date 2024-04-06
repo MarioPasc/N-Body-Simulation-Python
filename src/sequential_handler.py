@@ -13,9 +13,9 @@ class SequentialHandler:
         - N (int): Number of bodies to simulate.
         - G (float): Gravitational constant, passed to the Physics instance.
         """
-        self.bodies = [Body(position=np.random.rand(3) * 100, 
-                            velocity=np.random.rand(3) * 10,
-                            mass=np.random.rand() * 10 + 1) 
+        self.bodies = [Body(position=np.random.rand(2) * 100, 
+                            velocity=np.random.rand(2) * 50,
+                            mass=np.random.rand() * 10 + 50) 
                        for _ in range(N)]
         self.physics = Physics(G)
         self._total_time = 0.0
@@ -33,9 +33,10 @@ class SequentialHandler:
         start_time = time.perf_counter() if measure_time else None
 
         for i, body in enumerate(self.bodies):
-            total_acceleration = np.zeros(3)
-            for j, other_body in enumerate(self.bodies):
+            total_acceleration = np.zeros(2)
+            for j in range(i+1, len(self.bodies)):
                 if i != j:
+                    other_body = self.bodies[j]
                     distance_vector = other_body.position - body.position
                     acceleration = self.physics.calculate_acceleration(other_body.mass, distance_vector)
                     total_acceleration += acceleration

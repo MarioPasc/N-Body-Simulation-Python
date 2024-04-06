@@ -24,7 +24,7 @@ class Body:
         self.position = np.array(position, dtype=float)
         self.velocity = np.array(velocity, dtype=float)
         self.mass = mass
-        self.acceleration = np.zeros(3, dtype=float)
+        self.acceleration = np.zeros(2, dtype=float)
 
     def update_position(self, new_position: np.ndarray):
         """
