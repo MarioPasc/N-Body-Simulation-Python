@@ -42,7 +42,11 @@ class Physics:
             return self.G * mass2 / (mod_distance**3) * distance
         else:
             return np.zeros_like(distance)
-        
+
+    def resolve_collision(self, body1, body2):
+        body1.velocity, body2.velocity = body2.velocity, body1.velocity
+
+
     def update_velocity_position(self, velocity: np.ndarray, position: np.ndarray, acceleration: np.ndarray, dt: float) -> Tuple[np.ndarray, np.ndarray]:
         """
         Updates the velocity and position of a body using the Euler method.

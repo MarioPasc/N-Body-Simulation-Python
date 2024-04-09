@@ -14,9 +14,10 @@ class SequentialHandler:
         - G (float): Gravitational constant, passed to the Physics instance.
         """
         if bodies is None:
-            self.bodies = [Body(position=np.random.rand(2) * 50, 
-                                velocity=np.random.rand(2) * 100,
-                                mass=np.random.rand() * 500) 
+            self.bodies = [Body(position=np.random.rand(2) * 4, 
+                                velocity=np.random.rand(2),
+                                radius = 0.1,
+                                mass=np.random.rand()) 
                         for _ in range(N)]
         else:
             self.bodies = bodies    
@@ -40,10 +41,15 @@ class SequentialHandler:
         # Calculate new accelerations for each body
         for i, body in enumerate(self.bodies):
             acceleration = np.zeros(2)
-            for j, other_body in enumerate(self.bodies):
+            for j in range(i+1, len(self.bodies)):
+                other_body = self.bodies[j]
                 if i != j:
                     distance_vector = other_body.position - body.position
-                    acceleration = self.physics.calculate_acceleration(other_body.mass, distance_vector)
+                    # If the objects are too close, compute the collision method, if not, compute acceleration
+                    if np.linalg.norm(distance_vector) <= (body.radius + other_body.radius):
+                        self.physics.resolve_collision(body1=body, body2=other_body)
+                    else:
+                        acceleration = self.physics.calculate_acceleration(other_body.mass, distance_vector)
             body.update_acceleration(acceleration)
 
         # Update velocities and positions for each body

@@ -62,7 +62,7 @@ class SimulationRunner:
 
 def main():
     G = 1  # Constante gravitacional
-    dt = 0.01  # Paso de tiempo
+    dt = 0.1  # Paso de tiempo
     total_time = 20  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
     
@@ -75,17 +75,18 @@ def main():
     body5 = Body(mass=1.0, position=[-122.6, -10.5], velocity=[0, -0.5])
     body6 = Body(mass=1, position=[0, -350.5], velocity=[0.4, 0])
     bodies = [bodyCentral, body1, body2, body3, body4, body5, body6]
-    """
+    
     
     bodies = [
-        Body(mass=1, position=[2,5], velocity=[0.5,0.5]),
-        Body(mass=1, position=[5,2], velocity=[0.5,0.2]),
-        Body(mass=1, position=[3,3], velocity=[0.1, 0.5]),
-        Body(mass=1, position=[0.6,2.5], velocity=[0.5,0.5])
+        Body(mass=1, position=[2,5], radius=0.1, velocity=[0.5,0.5]),
+        Body(mass=1, position=[5,2], radius=0.1, velocity=[0.5,0.2]),
+        Body(mass=1, position=[3,3], radius=0.1, velocity=[0.1, 0.5]),
+        Body(mass=1, position=[0.6,2.5], radius=0.1, velocity=[0.5,0.5])
     ]
+    """
     
     # Crear e inicializar el runner de la simulación
-    simulation_runner = SimulationRunner(N=len(bodies), G=G, dt=dt, total_time=total_time, bodies=bodies)
+    simulation_runner = SimulationRunner(N=15, G=G, dt=dt, total_time=total_time)
     
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)

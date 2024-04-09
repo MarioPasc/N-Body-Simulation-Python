@@ -12,7 +12,7 @@ class Body:
     - acceleration (np.ndarray): The body's acceleration in 3D space.
     """
 
-    def __init__(self, position: np.ndarray, velocity: np.ndarray, mass: float):
+    def __init__(self, position: np.ndarray, velocity: np.ndarray, mass: float, radius: int):
         """
         Initializes a new instance of the Body class.
         
@@ -24,6 +24,7 @@ class Body:
         self.position = np.array(position, dtype=float)
         self.velocity = np.array(velocity, dtype=float)
         self.mass = mass
+        self.radius = radius
         self.acceleration = np.zeros(2, dtype=float)
 
     def update_position(self, new_position: np.ndarray):
