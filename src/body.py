@@ -3,7 +3,7 @@ from typing import List
 
 class Body:
     """
-    Represents a celestial body in a 3D N-body simulation.
+    Represents a celestial body in a 2D N-body simulation.
     
     Attributes:
     - position (np.ndarray): The body's position in 3D space.
