@@ -6,6 +6,9 @@ from body import Body
 from typing import List, Optional
 import numpy as np
 from matplotlib.animation import FFMpegWriter
+from matplotlib.animation import PillowWriter
+
+
 class SimulationRunner:
     def __init__(self, N: int, G: float = 6.6743e-11, dt: float =0.01, total_time: int =100, bodies: Optional[List[Body]] = None):
         """
@@ -25,7 +28,7 @@ class SimulationRunner:
             self.handler.update_simulation(self.dt, measure_time=measure_time)
             self.positions.append([body.position for body in self.handler.bodies])
 
-    def visualize(self, save: bool = False, output_file: str='simulation.mp4', speed_factor: int=1, base_interval:int =50):
+    def visualize(self, save: bool = False, output_file: str='simulation.gif', speed_factor: int=1, base_interval:int =50):
         fig, ax = plt.subplots()
         ax.set_xlim((-1, 30))
         ax.set_ylim((-1, 30))
@@ -45,17 +48,12 @@ class SimulationRunner:
                 x, y = positions[i]
                 line.set_data(x, y)
                 trail.set_data(positions[:i+1, 0], positions[:i+1, 1])
-                for idx, (line, body) in enumerate(zip(lines, self.handler.bodies)):
-                    velocity = np.linalg.norm(body.velocity)
-                    line.set_label(f'Body {idx}: v={velocity:.2f}')
-            ax.legend(loc='upper left')
             return lines + trails
 
         interval = base_interval / speed_factor
         ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval)
         if save: 
-            writer = FFMpegWriter(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-            ani.save('filename.mp4', writer=writer)
+            ani.save(output_file, writer=PillowWriter(fps=30))
         plt.show()
 
 
@@ -63,10 +61,9 @@ class SimulationRunner:
 
 
 def main():
-    N = 3  # Número de cuerpos
     G = 1  # Constante gravitacional
-    dt = 0.1  # Paso de tiempo
-    total_time = 50  # Tiempo total de simulación
+    dt = 0.01  # Paso de tiempo
+    total_time = 20  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
     
     """
@@ -99,7 +96,7 @@ def main():
 
     # Visualizar los resultados de la simulación
     print("Visualizando resultados...")
-    simulation_runner.visualize(save=True, speed_factor=10)
+    simulation_runner.visualize(save=True, speed_factor=2)
 
 if __name__ == "__main__":
     main()
