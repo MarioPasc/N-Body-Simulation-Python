@@ -49,7 +49,7 @@ class SimulationRunner:
         interval = base_interval / speed_factor
         ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval)
         if save: 
-            ani.save(output_file, writer=animation.PillowWriter(fps=15))
+            ani.save(output_file, writer=animation.PillowWriter(fps=1))
         plt.show()
 
 
@@ -103,7 +103,7 @@ def main():
 
     # Visualizar los resultados de la simulación
     print("Visualizando resultados...")
-    simulation_runner.visualize(save=True, speed_factor=2)
+    simulation_runner.visualize(save=True, speed_factor=15)
 
 if __name__ == "__main__":
     main()

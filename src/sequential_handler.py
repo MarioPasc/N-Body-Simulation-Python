@@ -39,7 +39,7 @@ class SequentialHandler:
 
         # Calculate new accelerations for each body
         for i, body in enumerate(self.bodies):
-            acceleration = np.zeros(2)
+            new_acceleration = np.zeros(2)
             for j, other_body in enumerate(self.bodies):
                 if i != j:
                     distance_vector = other_body.position - body.position
