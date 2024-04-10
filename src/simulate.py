@@ -57,7 +57,6 @@ class SimulationRunner:
 
 
 def main():
-    N = 3  # Número de cuerpos
     G = 1  # Constante gravitacional
     dt = 0.01  # Paso de tiempo
     total_time = 50  # Tiempo total de simulación
