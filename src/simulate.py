@@ -1,18 +1,23 @@
 from sequential_handler import SequentialHandler
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.animation import writers 
 from tqdm import tqdm
 from body import Body
 from typing import List, Optional
 import numpy as np
-from IPython import display 
+import subprocess
+import time
+
+
 class SimulationRunner:
     def __init__(self, N: int, G: float = 6.6743e-11, dt: float =0.01, total_time: int =100, bodies: Optional[List[Body]] = None):
         """
         Initialize the simulation with N bodies, gravitational constant G,
         timestep dt, and total simulation time.
         """
-        self.handler = SequentialHandler(N=N, G=G, bodies=bodies)
+        self.bodies = bodies
+        self.handler = SequentialHandler(N=N, G=G, bodies=self.bodies)
         self.dt = dt
         self.steps = int(total_time / dt)
         self.positions = []  # To store the positions of all bodies at each timestep
@@ -25,7 +30,19 @@ class SimulationRunner:
             self.handler.update_simulation(self.dt, measure_time=measure_time)
             self.positions.append([body.position for body in self.handler.bodies])
 
-    def visualize(self, save: bool = False, output_file: str='simulation.gif', speed_factor: int=1, base_interval:int =50):
+    def create_gif(self, input_video, output_gif, fps=30, width=800):
+        command = [
+            'ffmpeg',
+            '-i', input_video,
+            '-vf', f'fps={fps},scale={width}:-1:flags=lanczos',
+            '-c:v', 'gif',
+            '-loop', '0',
+            output_gif
+        ]
+
+        subprocess.run(command, check=True)
+
+    def visualize(self, save: bool = False, output_file: str='simulations/simulation', speed_factor: int=1, base_interval:int =50):
         fig, ax = plt.subplots()
         ax.set_xlim((-1, 30))
         ax.set_ylim((-1, 30))
@@ -55,8 +72,14 @@ class SimulationRunner:
         ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval, repeat=True)
         if save: 
             ani_gif = animation.FuncAnimation(fig, animate, frames=frame_generator(), init_func=init, blit=False, interval=50 / speed_factor, repeat=True)
-            ani_gif.save(output_file, writer='imagemagick', cache_frame_data=False, fps=30)
+            Writter = writers['ffmpeg']
+            writter = Writter(fps = 15, metadata={'artist': 'Me'}, bitrate=1800)
+            ani_gif.save(f'{output_file}.mp4', writter)
+            time.sleep(5)
+            self.create_gif(f'{output_file}.mp4', f'{output_file}.gif')
         plt.show()
+
+
 
 
 
@@ -65,19 +88,9 @@ class SimulationRunner:
 def main():
     G = 1  # Constante gravitacional
     dt = 0.01  # Paso de tiempo
-    total_time = 50  # Tiempo total de simulación
+    total_time = 60  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
-    
-    def many_bodies():
-        bodyCentral = Body(mass=50, velocity=[0,0], position=[0,0])
-        body1 = Body(mass=1.5, position=[5,5], velocity=[-1.0,1.5])
-        body2 = Body(mass=2.0, position=[-85,85], velocity=[-0.2,-0.6])
-        body3 = Body(mass=0.5, position=[20,20], velocity=[-0.9, 0.9])
-        body4 = Body(mass=1.5, position=[208,17], velocity=[0, 0.5])
-        body5 = Body(mass=1.0, position=[-122.6, -10.5], velocity=[0, -0.5])
-        body6 = Body(mass=1, position=[0, -350.5], velocity=[0.4, 0])
-        bodies = [bodyCentral, body1, body2, body3, body4, body5, body6]
-        return bodies
+
 
     def four_particles():
         bodies = [
@@ -88,14 +101,7 @@ def main():
         ]
         return bodies
     
-    
-    def two_particles():
-        bodies = [
-        Body(mass=1, position=[2,5], velocity=[0.5,0.5]),    
-        Body(mass=1, position=[3,3], velocity=[0.1, 0.5])
-        ]
-        return bodies
-    
+
     bodies = four_particles()
     # Crear e inicializar el runner de la simulación
     simulation_runner = SimulationRunner(N=len(bodies), G=G, dt=dt, total_time=total_time, bodies=bodies)

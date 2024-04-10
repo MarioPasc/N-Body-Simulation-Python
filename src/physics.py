@@ -22,7 +22,7 @@ class Physics:
         - eps (float): A small epsilon value to prevent division by zero and ensure numerical stability.
         """
         self.G = G
-        self.softening = 0.01
+        self.softening = 0.01**3
         self.eps = .5
 
     def calculate_acceleration(self, mass2: float, distance: np.ndarray) -> np.ndarray:
@@ -38,7 +38,7 @@ class Physics:
         """
         mod_distance = np.linalg.norm(distance)
         if mod_distance > self.eps:
-            return self.G * mass2 / (mod_distance**3 + self.softening**3) * distance
+            return self.G * mass2 / (mod_distance**3 + self.softening) * distance
         else:
             return np.zeros_like(distance)
         
