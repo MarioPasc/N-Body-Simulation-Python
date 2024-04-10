@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List, Tuple
+from body import Body
 
 class InvalidTimeStepError(ValueError):
     """Exception raised when an invalid timestep is provided to the simulation."""
@@ -42,6 +43,11 @@ class Physics:
             return self.G * mass2 / (mod_distance**3) * distance
         else:
             return np.zeros_like(distance)
+        
+    def resolve_collisions(self, body1: Body, body2: Body, distance: np.ndarray) -> None:
+        if np.linalg.norm(distance) == 0:
+            body1.velocity, body2.velocity = body2.velocity, body1.velocity
+        pass    
         
     def update_velocity_position(self, velocity: np.ndarray, position: np.ndarray, acceleration: np.ndarray, dt: float) -> Tuple[np.ndarray, np.ndarray]:
         """

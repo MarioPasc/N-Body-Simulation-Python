@@ -45,6 +45,7 @@ class SequentialHandler:
                     distance_vector = other_body.position - body.position
                     acceleration = self.physics.calculate_acceleration(other_body.mass, distance_vector)
                     new_acceleration += acceleration
+                    self.physics.resolve_collisions(body1=body, body2=other_body, distance=distance_vector)
             body.update_acceleration(new_acceleration)
 
         # Update velocities and positions for each body
