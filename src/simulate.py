@@ -5,6 +5,7 @@ from tqdm import tqdm
 from body import Body
 from typing import List, Optional
 import numpy as np
+from IPython import display 
 class SimulationRunner:
     def __init__(self, N: int, G: float = 6.6743e-11, dt: float =0.01, total_time: int =100, bodies: Optional[List[Body]] = None):
         """
@@ -39,6 +40,10 @@ class SimulationRunner:
                 trail.set_data([], [])
             return lines + trails
 
+        def frame_generator():
+            for i in range(0, len(self.positions), 10):  
+                yield i
+
         def animate(i):
             for line, trail, positions in zip(lines, trails, np.array(self.positions).transpose(1, 0, 2)):
                 x, y = positions[i]
@@ -47,9 +52,10 @@ class SimulationRunner:
             return lines + trails
 
         interval = base_interval / speed_factor
-        ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval)
+        ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval, repeat=True)
         if save: 
-            ani.save(output_file, writer=animation.PillowWriter(fps=1))
+            ani_gif = animation.FuncAnimation(fig, animate, frames=frame_generator(), init_func=init, blit=False, interval=50 / speed_factor, repeat=True)
+            ani_gif.save(output_file, writer='imagemagick', cache_frame_data=False, fps=30)
         plt.show()
 
 
@@ -62,17 +68,17 @@ def main():
     total_time = 50  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
     
-    """
-    bodyCentral = Body(mass=50, velocity=[0,0], position=[0,0])
-    body1 = Body(mass=1.5, position=[5,5], velocity=[-1.0,1.5])
-    body2 = Body(mass=2.0, position=[-85,85], velocity=[-0.2,-0.6])
-    body3 = Body(mass=0.5, position=[20,20], velocity=[-0.9, 0.9])
-    body4 = Body(mass=1.5, position=[208,17], velocity=[0, 0.5])
-    body5 = Body(mass=1.0, position=[-122.6, -10.5], velocity=[0, -0.5])
-    body6 = Body(mass=1, position=[0, -350.5], velocity=[0.4, 0])
-    bodies = [bodyCentral, body1, body2, body3, body4, body5, body6]
-    """
-    
+    def many_bodies():
+        bodyCentral = Body(mass=50, velocity=[0,0], position=[0,0])
+        body1 = Body(mass=1.5, position=[5,5], velocity=[-1.0,1.5])
+        body2 = Body(mass=2.0, position=[-85,85], velocity=[-0.2,-0.6])
+        body3 = Body(mass=0.5, position=[20,20], velocity=[-0.9, 0.9])
+        body4 = Body(mass=1.5, position=[208,17], velocity=[0, 0.5])
+        body5 = Body(mass=1.0, position=[-122.6, -10.5], velocity=[0, -0.5])
+        body6 = Body(mass=1, position=[0, -350.5], velocity=[0.4, 0])
+        bodies = [bodyCentral, body1, body2, body3, body4, body5, body6]
+        return bodies
+
     def four_particles():
         bodies = [
         Body(mass=1, position=[2,5], velocity=[0.5,0.5]),
@@ -90,7 +96,7 @@ def main():
         ]
         return bodies
     
-    bodies = two_particles()
+    bodies = four_particles()
     # Crear e inicializar el runner de la simulación
     simulation_runner = SimulationRunner(N=len(bodies), G=G, dt=dt, total_time=total_time, bodies=bodies)
     
