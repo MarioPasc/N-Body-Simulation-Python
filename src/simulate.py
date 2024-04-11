@@ -128,8 +128,9 @@ def main():
 
     bodies = four_particles()
     # Crear e inicializar el runner de la simulación
-    seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=0.01)
-    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=seq_handler)
+    seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=.5)
+    parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.5)
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=parallel_handler)
     
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)

@@ -30,12 +30,9 @@ class Physics:
         Returns:
         - np.ndarray: The calculated acceleration vector.
         """
-        mod_distance = np.linalg.norm(distance)
-        if mod_distance > self.min_dist:
-            return self.G * mass2 / (mod_distance**3 + self.softening) * distance
-        else:
-            return np.zeros_like(distance)
-        
+        mod_distance = np.linalg.norm(distance) + self.softening
+        return self.G * mass2 / (mod_distance**3) * distance
+       
     def resolve_collisions(self, body1: Body, body2: Body, distance: np.ndarray) -> None:
         if np.linalg.norm(distance) == 0:
             body1.velocity, body2.velocity = body2.velocity, body1.velocity
