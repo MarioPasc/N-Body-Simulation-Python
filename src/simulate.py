@@ -62,20 +62,6 @@ class SimulationRunner:
         ax.annotate(f'$\epsilon$: {self.epsilon}', xy=(margin_x, margin_y - 0.05), xycoords='axes fraction', color='white', verticalalignment='top', horizontalalignment='left')
         ax.annotate(f'N: {len(self.bodies)}', xy=(margin_x, margin_y - 0.10), xycoords='axes fraction', color='white', verticalalignment='top', horizontalalignment='left')
 
-
-        # Función para actualizar la leyenda
-        def update_legend(i):
-            # Eliminar la leyenda anterior si existe
-            if 'legend' in ax.__dict__:
-                ax.legend.remove()
-            # Crear la nueva leyenda con la información actualizada
-            legend_text = [
-                f"GC: {self.G:.2e}",
-                f"ε: 0.5",
-                f"N: {len(self.bodies)}",
-            ]
-            ax.legend(legend_text, loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0., facecolor='black')
-
         def init():
             for line in lines:
                 line.set_data([], [])

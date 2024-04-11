@@ -6,13 +6,6 @@ from typing import List, Optional, Tuple
 class SequentialHandler:
     def __init__(self, N: int, G: float = 6.6743e-11, epsilon: float = 0.5, softening: float = 0.1, 
                  bodies: Optional[List[Body]] = None):
-        """
-        Initializes a new SequentialHandler instance which manages N bodies in a simulation.
-        
-        Parameters:
-        - N (int): Number of bodies to simulate.
-        - G (float): Gravitational constant, passed to the Physics instance.
-        """
         if bodies is None:
             self.bodies = [Body(position=np.random.rand(2) * 50, 
                                 velocity=np.random.rand(2) * 100,
@@ -26,14 +19,6 @@ class SequentialHandler:
         self._frame_count = 0
 
     def update_simulation(self, dt: float, measure_time: bool = False):
-        """
-        Updates the simulation by one time step, calculating interactions between all bodies.
-        Optionally measures and prints the execution time of the update in milliseconds.
-        
-        Parameters:
-        - dt (float): The time step for the simulation update.
-        - measure_time (bool): If True, measures and prints the execution time.
-        """
         start_time = time.perf_counter() if measure_time else None
 
         # Calculate new accelerations for each body
@@ -62,10 +47,6 @@ class SequentialHandler:
 
     @property
     def avg_fps_time(self):
-        """
-        Returns the average time per frame (update) in milliseconds. 
-        This value is only meaningful after the simulation has been updated at least once with measure_time=True.
-        """
         if self._frame_count > 0:
             return self._total_time / self._frame_count
         else:
