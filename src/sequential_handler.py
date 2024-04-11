@@ -3,58 +3,6 @@ from body import Body
 import time
 from typing import List, Optional, Tuple
 
-
-class Physics:
-    def __init__(self, G: float = 6.6743e-11, softening: float = 0.01, epsilon: float = 0.5):
-        """
-        Initializes a new Physics instance with a given gravitational constant.
-
-        Parameters:
-        - G (float): The gravitational constant to be used in the simulation.
-
-        Attributes:
-        - eps (float): A small epsilon value to prevent division by zero and ensure numerical stability.
-        """
-        self.G = G
-        self.softening = softening**3
-        self.min_dist = epsilon
-
-    def calculate_acceleration(self, mass2: float, distance: np.ndarray) -> np.ndarray:
-        """
-        Calculates the acceleration on a body due to the gravitational effect of another body.
-        
-        Parameters:
-        - mass2 (float): The mass of the body exerting the gravitational force.
-        - distance_vector (np.ndarray): The vector distance between the two bodies.
-        
-        Returns:
-        - np.ndarray: The calculated acceleration vector.
-        """
-        mod_distance = np.linalg.norm(distance) + self.softening
-        return self.G * mass2 / (mod_distance**3) * distance
-       
-    def resolve_collisions(self, body1: Body, body2: Body, distance: np.ndarray) -> None:
-        if np.linalg.norm(distance) == 0:
-            body1.velocity, body2.velocity = body2.velocity, body1.velocity
-        pass    
-        
-    def update_velocity_position(self, velocity: np.ndarray, position: np.ndarray, acceleration: np.ndarray, dt: float) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Updates the velocity and position of a body using the Euler method.
-        
-        Parameters:
-        - velocity (np.ndarray): Initial velocity of the body.
-        - position (np.ndarray): Initial position of the body.
-        - acceleration (np.ndarray): Acceleration of the body.
-        - dt (float): Time step.
-        
-        Returns:
-        - Tuple[np.ndarray, np.ndarray]: Updated velocity and position.
-        """
-        new_velocity = velocity + acceleration * dt
-        new_position = position + new_velocity * dt
-        return new_velocity, new_position
-
 class SequentialHandler:
     def __init__(self, N: int, G: float = 6.6743e-11, epsilon: float = 0.5, softening: float = 0.1, 
                  bodies: Optional[List[Body]] = None):
@@ -74,7 +22,6 @@ class SequentialHandler:
             self.bodies = bodies    
         self.G = G
         self.softening = softening
-        self.physics = Physics(G=self.G , epsilon=epsilon, softening=self.softening)
         self._total_time = 0.0
         self._frame_count = 0
 
@@ -95,16 +42,15 @@ class SequentialHandler:
             for j, other_body in enumerate(self.bodies):
                 if i != j:
                     distance_vector = other_body.position - body.position
-                    acceleration = self.physics.calculate_acceleration(other_body.mass, distance_vector)
+                    mod_distance = np.linalg.norm(distance_vector) + self.softening
+                    acceleration = self.G * other_body.mass / (mod_distance**3) * distance_vector
                     new_acceleration += acceleration
-                    self.physics.resolve_collisions(body1=body, body2=other_body, distance=distance_vector)
             body.update_acceleration(new_acceleration)
 
         # Update velocities and positions for each body
         for body in self.bodies:
-            new_velocity, new_position = self.physics.update_velocity_position(body.velocity, body.position, body.acceleration, dt)
-            body.update_velocity(new_velocity)
-            body.update_position(new_position)
+            body.update_velocity(body.velocity + body.acceleration * dt)
+            body.update_position(body.position + body.velocity * dt)
         
 
         if measure_time:

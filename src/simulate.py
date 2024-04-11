@@ -1,6 +1,6 @@
 from sequential_handler import SequentialHandler
 from parallel_handler import ParallelHandler
-
+from concurrent_handler import ConcurrentProcessHandler, ConcurrentThreadHandler
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import writers 
@@ -113,7 +113,7 @@ def main():
     G = 1  # Constante gravitacional
     dt = 0.01  # Paso de tiempo
     total_time = 60  # Tiempo total de simulación
-    measure_time = True  # Flag para medir el tiempo de ejecución
+    measure_time = False  # Flag para medir el tiempo de ejecución
 
 
     def four_particles():
@@ -128,8 +128,10 @@ def main():
 
     bodies = four_particles()
     # Crear e inicializar el runner de la simulación
-    seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=.5)
-    parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.5)
+    seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
+    parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
+    process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
+    thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=parallel_handler)
     
     # Ejecutar la simulación
