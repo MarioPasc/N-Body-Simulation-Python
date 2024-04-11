@@ -5,34 +5,41 @@ from sequential_handler import SequentialHandler
 from parallel_handler import ParallelHandler
 
 class Experiment:
-
     def __init__(self, output_path: str) -> None:
         self.output_path = output_path
-        self.results = []
+        self.sequential_results = []
+        self.parallel_results = []
 
     def run_experiment(self, N_range: range, G: float, dt: float, total_time: int, parallel: bool = False) -> None:
         for N in N_range:
             if parallel:
                 handler = ParallelHandler(N=N, G=G, softening=0.1)
+                results_list = self.parallel_results
             else:
                 handler = SequentialHandler(N=N, G=G, softening=0.1)
+                results_list = self.sequential_results
+
             simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=handler)
             simulation_runner.run(measure_time=True)
-            # Obtener el tiempo promedio de refresco de frames y guardar en la lista de resultados
             avg_fps_time = simulation_runner.handler.avg_fps_time
-            self.results.append((N, avg_fps_time))
+            results_list.append((N, avg_fps_time))
             print(f"Completed: N={N}, avg_fps_time={avg_fps_time} ms, parallel={parallel}")
 
     def save_results_to_csv(self) -> None:
         with open(self.output_path, 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['N', 'avg_tf_seq', 'avg_tf_numba'])
-            writer.writerows(self.results)
+            writer.writerow(['N', 'avg_tf_seq', 'avg_tf_PyCUDA'])
+            writer.writerows(zip(
+                [N for N, _ in self.sequential_results],
+                [avg_tf for _, avg_tf in self.sequential_results],
+                [avg_tf for _, avg_tf in self.parallel_results]
+            ))
 
     def plot_results(self) -> None:
-        N_values, avg_tf_seq_values, avg_tf_numba_values = zip(*self.results)
+        N_values, avg_tf_seq_values = zip(*self.sequential_results)
+        _, avg_tf_numba_values = zip(*self.parallel_results)
         plt.plot(N_values, avg_tf_seq_values, marker='o', label='Sequential')
-        plt.plot(N_values, avg_tf_numba_values, marker='o', label='Parallel (Numba)')
+        plt.plot(N_values, avg_tf_numba_values, marker='o', label='Parallel (PyCUDA)')
         plt.xlabel('Number of Bodies (N)')
         plt.ylabel('Average Frame Time (ms)')
         plt.title('Average Frame Time vs. Number of Bodies')
@@ -44,8 +51,8 @@ class Experiment:
 
 def main() -> None:
     experiment = Experiment(output_path='experiments/experiment_results.csv')
-    experiment.run_experiment(N_range=range(10, 100, 10), G=1, dt=0.01, total_time=1, parallel=True)
     experiment.run_experiment(N_range=range(10, 100, 10), G=1, dt=0.01, total_time=1, parallel=False)
+    experiment.run_experiment(N_range=range(10, 100, 10), G=1, dt=0.01, total_time=1, parallel=True)
     experiment.save_results_to_csv()
     experiment.plot_results()
 
