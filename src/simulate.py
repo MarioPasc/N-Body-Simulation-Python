@@ -1,22 +1,30 @@
 from sequential_handler import SequentialHandler
+from parallel_handler import ParallelHandler
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import writers 
 from tqdm import tqdm
 from body import Body
+from typing import Union
 from typing import List, Optional
 import numpy as np
 import subprocess
 import time
 
 class SimulationRunner:
-    def __init__(self, N: int, G: float = 6.6743e-11, epsilon: float = 0.5, dt: float = 0.01, total_time: int = 100, bodies: Optional[List[Body]] = None):
-        self.N = N
-        self.G = G
-        self.epsilon = epsilon
+    def __init__(self, dt: float = 0.01, total_time: int = 100, 
+                 simulationHandler: Union[SequentialHandler, ParallelHandler] = None) -> None:
+        if simulationHandler is None:
+            print("Choose a simulation handler")
+            return
+        self.handler = simulationHandler
+
+        self.bodies = simulationHandler.bodies
+        self.N = len(self.bodies)
+        self.G = simulationHandler.G
+        self.epsilon = simulationHandler.softening
         self.dt = dt
-        self.bodies = bodies
-        self.handler = SequentialHandler(N=N, G=G, bodies=self.bodies)
         self.steps = int(total_time / dt)
         self.positions = []  # To store the positions of all bodies at each timestep
 
@@ -25,9 +33,10 @@ class SimulationRunner:
             self.handler.update_simulation(self.dt, measure_time=measure_time)
             self.positions.append([body.position for body in self.handler.bodies])
 
-    def create_gif(self, input_video, output_gif, fps=30, width=800):
+    def create_gif(self, input_video, output_gif, fps=15, width=600):
         command = [
             'ffmpeg',
+            '-y',
             '-i', input_video,
             '-vf', f'fps={fps},scale={width}:-1:flags=lanczos',
             '-c:v', 'gif',
@@ -62,7 +71,7 @@ class SimulationRunner:
             # Crear la nueva leyenda con la información actualizada
             legend_text = [
                 f"GC: {self.G:.2e}",
-                f"$\epsilon$: 0.5",
+                f"ε: 0.5",
                 f"N: {len(self.bodies)}",
             ]
             ax.legend(legend_text, loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0., facecolor='black')
@@ -86,14 +95,16 @@ class SimulationRunner:
             return lines + trails
 
         interval = base_interval / speed_factor
-        ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval, repeat=True)
         if save: 
-            ani_gif = animation.FuncAnimation(fig, animate, frames=frame_generator(), init_func=init, blit=False, interval=50 / speed_factor, repeat=True)
+            ani_gif = animation.FuncAnimation(fig, animate, frames=frame_generator(), init_func=init, blit=False, interval=50 / speed_factor, repeat=True, cache_frame_data=False)
             Writter = animation.writers['ffmpeg']
-            writter = Writter(fps = 15, metadata={'artist': 'Me'}, bitrate=1800)
-            ani_gif.save(f'{output_file}.mp4', writter)
+            writter = Writter(fps=15, metadata=dict(artist='Me'), bitrate=3000, codec='mpeg4', extra_args=['-pix_fmt', 'yuv420p'])
+            ani_gif.save(f'{output_file}.mp4', writer=writter, dpi=300)
             time.sleep(5)
             self.create_gif(f'{output_file}.mp4', f'{output_file}.gif')
+        else:
+            ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval, repeat=True)
+
         plt.show()
 
 
@@ -117,7 +128,8 @@ def main():
 
     bodies = four_particles()
     # Crear e inicializar el runner de la simulación
-    simulation_runner = SimulationRunner(N=len(bodies), G=G, dt=dt, total_time=total_time, bodies=bodies)
+    seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=0.01)
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=seq_handler)
     
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)
