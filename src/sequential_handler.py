@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 
 
 class Physics:
-    def __init__(self, G: float = 6.6743e-11):
+    def __init__(self, G: float = 6.6743e-11, softening: float = 0.01, epsilon: float = 0.5):
         """
         Initializes a new Physics instance with a given gravitational constant.
 
@@ -16,8 +16,8 @@ class Physics:
         - eps (float): A small epsilon value to prevent division by zero and ensure numerical stability.
         """
         self.G = G
-        self.softening = 0.01**3
-        self.eps = .5
+        self.softening = softening**3
+        self.min_dist = epsilon
 
     def calculate_acceleration(self, mass2: float, distance: np.ndarray) -> np.ndarray:
         """
@@ -31,7 +31,7 @@ class Physics:
         - np.ndarray: The calculated acceleration vector.
         """
         mod_distance = np.linalg.norm(distance)
-        if mod_distance > self.eps:
+        if mod_distance > self.min_dist:
             return self.G * mass2 / (mod_distance**3 + self.softening) * distance
         else:
             return np.zeros_like(distance)
@@ -59,7 +59,8 @@ class Physics:
         return new_velocity, new_position
 
 class SequentialHandler:
-    def __init__(self, N: int, G: float = 6.6743e-11, bodies: Optional[List[Body]] = None):
+    def __init__(self, N: int, G: float = 6.6743e-11, epsilon: float = 0.5, softening: float = 0.1, 
+                 bodies: Optional[List[Body]] = None):
         """
         Initializes a new SequentialHandler instance which manages N bodies in a simulation.
         
@@ -74,7 +75,9 @@ class SequentialHandler:
                         for _ in range(N)]
         else:
             self.bodies = bodies    
-        self.physics = Physics(G)
+        self.G = G
+        self.softening = softening
+        self.physics = Physics(G=self.G , epsilon=epsilon, softening=self.softening)
         self._total_time = 0.0
         self._frame_count = 0
 
