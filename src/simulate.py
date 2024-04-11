@@ -132,8 +132,8 @@ def main():
     parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=parallel_handler)
-    
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=thread_handler)
+
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)
 
@@ -143,7 +143,8 @@ def main():
 
     # Visualizar los resultados de la simulación
     print("Displaying simulation...")
-    simulation_runner.visualize(save=True, speed_factor=15)
+    simulation_runner.visualize(save=False, speed_factor=15)
+
 
 if __name__ == "__main__":
     main()

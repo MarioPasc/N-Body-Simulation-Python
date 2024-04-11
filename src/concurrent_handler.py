@@ -56,6 +56,13 @@ class ConcurrentProcessHandler:
         else:
             return 0.0
 
+import numpy as np
+from body import Body
+import time
+from typing import List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+
 class ConcurrentThreadHandler:
     def __init__(self, N: int, G: float = 6.6743e-11, softening: float = 0.1, bodies: Optional[List[Body]] = None):
         if bodies is None:
@@ -70,6 +77,7 @@ class ConcurrentThreadHandler:
         self._total_time = 0.0
         self._frame_count = 0
         self.lock = Lock()
+        self.positions = []  # To store the positions of all bodies at each timestep
 
     def calculate_acceleration(self, body: Body, other_bodies: List[Body]):
         acceleration = np.zeros(2)
@@ -94,6 +102,9 @@ class ConcurrentThreadHandler:
         with ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.update_body, i, dt) for i in range(len(self.bodies))]
             as_completed(futures)  # Wait for all threads to complete
+
+        # Store the current positions of all bodies
+        self.positions.append(np.array([body.position for body in self.bodies]))
 
         if measure_time:
             end_time = time.perf_counter()

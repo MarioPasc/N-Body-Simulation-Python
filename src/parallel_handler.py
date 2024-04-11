@@ -60,31 +60,33 @@ class ParallelHandler:
     def update_simulation(self, dt: float, measure_time: bool = False):
         start_time = time.perf_counter() if measure_time else None
 
+        # Flatten the arrays of positions, velocities, and masses to be one-dimensional
         positions = np.array([body.position for body in self.bodies], dtype=np.float32).flatten()
         velocities = np.array([body.velocity for body in self.bodies], dtype=np.float32).flatten()
         masses = np.array([body.mass for body in self.bodies], dtype=np.float32)
         accelerations = np.zeros_like(positions)
-
+        # Calculate the size of the grid and block for GPU execution
         N = len(self.bodies)
         block_size = 256
         grid_size = (N + block_size - 1) // block_size
-
+        # Allocate GPU memory for positions, velocities, masses, and accelerations
         positions_gpu = cuda.mem_alloc(positions.nbytes)
         velocities_gpu = cuda.mem_alloc(velocities.nbytes)
         masses_gpu = cuda.mem_alloc(masses.nbytes)
         accelerations_gpu = cuda.mem_alloc(accelerations.nbytes)
-
+        # Copy the positions, velocities, and masses to the GPU memory
         cuda.memcpy_htod(positions_gpu, positions)
         cuda.memcpy_htod(velocities_gpu, velocities)
         cuda.memcpy_htod(masses_gpu, masses)
-
+        # Execute the CUDA function to calculate accelerations on the GPU
         self.calculate_accelerations(positions_gpu, masses_gpu, accelerations_gpu, np.float32(self.G), np.float32(self.softening), np.float32(self.eps), np.int32(N), block=(block_size, 1, 1), grid=(grid_size, 1))
+        # Execute the CUDA function to update velocities and positions on the GPU
         self.update_velocities_positions(velocities_gpu, positions_gpu, accelerations_gpu, np.float32(dt), np.int32(N), block=(block_size, 1, 1), grid=(grid_size, 1))
-
+        # Copy the updated positions, velocities, and accelerations back from GPU to CPU memory
         cuda.memcpy_dtoh(positions, positions_gpu)
         cuda.memcpy_dtoh(velocities, velocities_gpu)
         cuda.memcpy_dtoh(accelerations, accelerations_gpu)
-
+        # Update the Body instances with the new velocities and positions
         for i, body in enumerate(self.bodies):
             body.update_acceleration(accelerations[i * 2:i * 2 + 2])
             body.update_velocity(velocities[i * 2:i * 2 + 2])
