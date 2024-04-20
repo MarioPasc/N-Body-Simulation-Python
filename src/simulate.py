@@ -31,7 +31,7 @@ class SimulationRunner:
     def run(self, measure_time=False):
         for _ in tqdm(range(self.steps), desc="Computing simulation...", colour="red"):
             self.handler.update_simulation(self.dt, measure_time=measure_time)
-            self.positions.append([body.position for body in self.handler.bodies])
+            self.positions.append(np.array([body.position for body in self.handler.bodies]))
 
     def create_gif(self, input_video, output_gif, fps=15, width=600):
         command = [
@@ -47,20 +47,22 @@ class SimulationRunner:
         subprocess.run(command, check=True)
 
     def visualize(self, save: bool = False, output_file: str='simulations/simulation', speed_factor: int=1, base_interval:int =50):
+        #plt.style.use('classic')
         plt.style.use('dark_background')
-
         fig, ax = plt.subplots()
-        ax.set_xlim((-1, 30))
-        ax.set_ylim((-1, 30))
+        num = 8
+        ax.set_xlim((-num, num))
+        ax.set_ylim((-num, num))
         ax.axis('off') # Desactivar los ejes
         # Obtener una paleta de colores
         cmap = plt.get_cmap('viridis', len(self.positions[0]))
         lines = [ax.plot([], [], 'o', color=cmap(i))[0] for i in range(len(self.positions[0]))]
         trails = [ax.plot([], [], '-', linewidth=0.5, color=cmap(i))[0] for i in range(len(self.positions[0]))]
         margin_x, margin_y = 0.02, 0.98  # Ajusta estos valores para cambiar el margen
-        ax.annotate(f'GC: {self.G:.2e}', xy=(margin_x, margin_y), xycoords='axes fraction', color='white', verticalalignment='top', horizontalalignment='left')
-        ax.annotate(f'$\epsilon$: {self.epsilon}', xy=(margin_x, margin_y - 0.05), xycoords='axes fraction', color='white', verticalalignment='top', horizontalalignment='left')
-        ax.annotate(f'N: {len(self.bodies)}', xy=(margin_x, margin_y - 0.10), xycoords='axes fraction', color='white', verticalalignment='top', horizontalalignment='left')
+        color = 'white'
+        ax.annotate(f'GC: {self.G:.2e}', xy=(margin_x, margin_y), xycoords='axes fraction', color=color, verticalalignment='top', horizontalalignment='left')
+        ax.annotate(f'$\epsilon$: {self.epsilon}', xy=(margin_x, margin_y - 0.05), xycoords='axes fraction', color=color, verticalalignment='top', horizontalalignment='left')
+        ax.annotate(f'N: {len(self.bodies)}', xy=(margin_x, margin_y - 0.10), xycoords='axes fraction', color=color, verticalalignment='top', horizontalalignment='left')
 
         def init():
             for line in lines:
@@ -111,14 +113,21 @@ def main():
         ]
         return bodies
     
+    def three_particles():
+        bodies = [
+            Body(mass=1, position=[-1, 0], velocity=[0.2, 0.3]),
+            Body(mass=1.5, position=[1, 0], velocity=[0.2, 0.3]),
+            Body(mass=1.6, position=[0, 1], velocity=[0.2, 0.2])
+        ]
+        return bodies
 
-    bodies = four_particles()
+    bodies = three_particles()
     # Crear e inicializar el runner de la simulación
     seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=thread_handler)
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=seq_handler)
 
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)

@@ -32,29 +32,33 @@ class Experiment:
             self.seq_results = results
         elif isinstance(handler, ParallelHandler):
             self.cuda_results = results
-        elif isinstance(handler, ConcurrentProcessHandler):
-            self.process_results = results
+        #elif isinstance(handler, ConcurrentProcessHandler):
+        #    self.process_results = results
         elif isinstance(handler, ConcurrentThreadHandler):
             self.thread_results = results
 
     def save_results_to_csv(self) -> None:
         with open(self.output_path, 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['N', 'Sequential', 'PyCUDA', 'ProcessPool', 'ThreadPool'])
+            #writer.writerow(['N', 'Sequential', 'PyCUDA', 'ProcessPool', 'ThreadPool'])
+            writer.writerow(['N', 'Sequential', 'PyCUDA', 'ThreadPool'])
             for i in range(len(self.seq_results)):
-                row = [self.seq_results[i][0], self.seq_results[i][1], self.cuda_results[i][1],
-                       self.process_results[i][1], self.thread_results[i][1]]
+                #row = [self.seq_results[i][0], self.seq_results[i][1], self.cuda_results[i][1], self.process_results[i][1], self.thread_results[i][1]]
+                row = [self.seq_results[i][0], 
+                       self.seq_results[i][1], 
+                       self.cuda_results[i][1], 
+                       self.thread_results[i][1]]
                 writer.writerow(row)
 
     def plot_results(self) -> None:
         N_values, seq_values = zip(*self.seq_results)
         _, cuda_values = zip(*self.cuda_results)
-        _, process_values = zip(*self.process_results)
+        #_, process_values = zip(*self.process_results)
         _, thread_values = zip(*self.thread_results)
 
         plt.plot(N_values, seq_values, marker='o', label='Sequential')
         plt.plot(N_values, cuda_values, marker='o', label='PyCUDA')
-        plt.plot(N_values, process_values, marker='o', label='ProcessPool')
+        #plt.plot(N_values, process_values, marker='o', label='ProcessPool')
         plt.plot(N_values, thread_values, marker='o', label='ThreadPool')
         plt.xlabel('Number of Bodies (N)')
         plt.ylabel('Average Frame Time (ms)')
@@ -65,22 +69,22 @@ class Experiment:
         plt.show()
 
 def main() -> None:
-    experiment = Experiment(output_path='experiments/experiment_results.csv')
-    N_range = range(10, 100, 10)
+    path = "/home/mariopasc/Python/Projects/NBodySimulation/N-Body-Simulation-Python/experiments/experiment_results.csv"
+    experiment = Experiment(output_path=path)
+    N_range = range(1, 1000, 100)
     G = 1
     dt = 0.01
     total_time = 1
 
     seq_handler = SequentialHandler(N=0, G=G, softening=0.1)
     cuda_handler = ParallelHandler(N=0, G=G, softening=0.1)
-    process_handler = ConcurrentProcessHandler(N=0, G=G, softening=0.1)
+    #process_handler = ConcurrentProcessHandler(N=0, G=G, softening=0.1)
     thread_handler = ConcurrentThreadHandler(N=0, G=G, softening=0.1)
 
     experiment.run_experiment(N_range, G, dt, total_time, seq_handler)
     experiment.run_experiment(N_range, G, dt, total_time, cuda_handler)
-    experiment.run_experiment(N_range, G, dt, total_time, process_handler)
+    #experiment.run_experiment(N_range, G, dt, total_time, process_handler)
     experiment.run_experiment(N_range, G, dt, total_time, thread_handler)
-
     experiment.save_results_to_csv()
     experiment.plot_results()
 

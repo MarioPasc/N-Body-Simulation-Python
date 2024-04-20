@@ -16,7 +16,7 @@ class ParallelHandler:
         else:
             self.bodies = bodies
         self.G = G
-        self.softening = softening**3
+        self.softening = softening
         self.eps = 0.5
         self._total_time = 0.0
         self._frame_count = 0
