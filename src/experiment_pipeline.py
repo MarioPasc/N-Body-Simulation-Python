@@ -71,7 +71,7 @@ class Experiment:
 def main() -> None:
     path = "/home/mariopasc/Python/Projects/NBodySimulation/N-Body-Simulation-Python/experiments/experiment_results.csv"
     experiment = Experiment(output_path=path)
-    N_range = range(1, 1000, 100)
+    N_range = range(1, 10000, 500)
     G = 1
     dt = 0.01
     total_time = 1

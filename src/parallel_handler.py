@@ -58,8 +58,6 @@ class ParallelHandler:
         self.update_velocities_positions = self.mod.get_function("update_velocities_positions")
 
     def update_simulation(self, dt: float, measure_time: bool = False):
-        start_time = time.perf_counter() if measure_time else None
-
         # Flatten the arrays of positions, velocities, and masses to be one-dimensional
         positions = np.array([body.position for body in self.bodies], dtype=np.float32).flatten()
         velocities = np.array([body.velocity for body in self.bodies], dtype=np.float32).flatten()
@@ -69,6 +67,8 @@ class ParallelHandler:
         N = len(self.bodies)
         block_size = 256
         grid_size = (N + block_size - 1) // block_size
+
+        start_time = time.perf_counter() if measure_time else None
         # Allocate GPU memory for positions, velocities, masses, and accelerations
         positions_gpu = cuda.mem_alloc(positions.nbytes)
         velocities_gpu = cuda.mem_alloc(velocities.nbytes)

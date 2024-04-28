@@ -50,7 +50,7 @@ class SimulationRunner:
         #plt.style.use('classic')
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
-        num = 8
+        num = 15
         ax.set_xlim((-num, num))
         ax.set_ylim((-num, num))
         ax.axis('off') # Desactivar los ejes
@@ -127,7 +127,9 @@ def main():
     parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=seq_handler)
+    parallel_handler2 = ParallelHandler(N=10, G=G, softening=.3)
+
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=thread_handler)
 
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)
