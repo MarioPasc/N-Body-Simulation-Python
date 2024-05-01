@@ -71,19 +71,17 @@ class Experiment:
 def main() -> None:
     path = "/home/mariopasc/Python/Projects/NBodySimulation/N-Body-Simulation-Python/experiments/experiment_results.csv"
     experiment = Experiment(output_path=path)
-    N_range = range(1, 10000, 500)
+    N_range = range(1, 1000, 25)
     G = 1
     dt = 0.01
     total_time = 1
 
     seq_handler = SequentialHandler(N=0, G=G, softening=0.1)
     cuda_handler = ParallelHandler(N=0, G=G, softening=0.1)
-    #process_handler = ConcurrentProcessHandler(N=0, G=G, softening=0.1)
     thread_handler = ConcurrentThreadHandler(N=0, G=G, softening=0.1)
 
     experiment.run_experiment(N_range, G, dt, total_time, seq_handler)
     experiment.run_experiment(N_range, G, dt, total_time, cuda_handler)
-    #experiment.run_experiment(N_range, G, dt, total_time, process_handler)
     experiment.run_experiment(N_range, G, dt, total_time, thread_handler)
     experiment.save_results_to_csv()
     experiment.plot_results()
