@@ -46,10 +46,25 @@ pip install -r requirements.txt
   <img src="https://github.com/MarioPasc/N-Body-Simulation-Python/assets/120520768/428721b7-01e6-4734-903e-22886cd9317d" alt="Overall"/>
 </p>
 
-## Simulation Example
+## Simulation Examples
+
+### Stable 2 Body System
+
 <p align="center">
-  <img src="https://github.com/MarioPasc/N-Body-Simulation-Python/assets/120520768/bd184abf-b7a5-41c7-a7d5-84fe4dcbc25b" alt="Overall"/>
+  <img src="https://github.com/MarioPasc/N-Body-Simulation-Python/assets/120520768/8c682869-c29c-477e-ac4b-1f865a530d3b" alt="Overall"/>
 </p>
+
+### 3 Body System
+
+<p align="center">
+  <img src="https://github.com/MarioPasc/N-Body-Simulation-Python/assets/120520768/c030cf14-c64c-4b52-931c-7481f594b92d" alt="Overall"/>
+</p>
+
+### Lagrange Points
+<p align="center">
+  <img src="https://github.com/MarioPasc/N-Body-Simulation-Python/assets/120520768/350795ce-8a61-43f0-9127-297b7522c1ad" alt="Overall"/>
+</p>
+
 
 ## Contributing
 Contributions to this project are welcome. Here are some ways you can contribute:
