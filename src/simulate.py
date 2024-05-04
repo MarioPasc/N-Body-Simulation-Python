@@ -3,14 +3,13 @@ from parallel_handler import ParallelHandler
 from concurrent_handler import ConcurrentProcessHandler, ConcurrentThreadHandler
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.animation import writers 
 from tqdm import tqdm
 from body import Body
 from typing import Union
-from typing import List, Optional
 import numpy as np
 import subprocess
 import time
+import math
 
 class SimulationRunner:
     def __init__(self, dt: float = 0.01, total_time: int = 100, 
@@ -33,26 +32,13 @@ class SimulationRunner:
             self.handler.update_simulation(self.dt, measure_time=measure_time)
             self.positions.append(np.array([body.position for body in self.handler.bodies]))
 
-    def create_gif(self, input_video, output_gif, fps=15, width=600):
-        command = [
-            'ffmpeg',
-            '-y',
-            '-i', input_video,
-            '-vf', f'fps={fps},scale={width}:-1:flags=lanczos',
-            '-c:v', 'gif',
-            '-loop', '0',
-            output_gif
-        ]
-
-        subprocess.run(command, check=True)
-
     def visualize(self, save: bool = False, output_file: str='simulations/simulation', speed_factor: int=1, base_interval:int =50):
         #plt.style.use('classic')
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
         num = 15
-        ax.set_xlim((-num, num))
-        ax.set_ylim((-num, num))
+        ax.set_xlim((-1, num))
+        ax.set_ylim((-1, num))
         ax.axis('off') # Desactivar los ejes
         # Obtener una paleta de colores
         cmap = plt.get_cmap('viridis', len(self.positions[0]))
@@ -83,13 +69,10 @@ class SimulationRunner:
             return lines + trails
 
         interval = base_interval / speed_factor
-        if save: 
+        if save:
             ani_gif = animation.FuncAnimation(fig, animate, frames=frame_generator(), init_func=init, blit=False, interval=50 / speed_factor, repeat=True, cache_frame_data=False)
-            Writter = animation.writers['ffmpeg']
-            writter = Writter(fps=15, metadata=dict(artist='Me'), bitrate=3000, codec='mpeg4', extra_args=['-pix_fmt', 'yuv420p'])
-            ani_gif.save(f'{output_file}.mp4', writer=writter, dpi=300)
-            time.sleep(5)
-            self.create_gif(f'{output_file}.mp4', f'{output_file}.gif')
+            writer = animation.PillowWriter(fps=15)
+            ani_gif.save(f'{output_file}.gif', writer=writer, dpi=300)
         else:
             ani = animation.FuncAnimation(fig, animate, frames=self.steps, init_func=init, blit=False, interval=interval, repeat=True)
 
@@ -100,7 +83,7 @@ class SimulationRunner:
 def main():
     G = 1  # Constante gravitacional
     dt = 0.01  # Paso de tiempo
-    total_time = 60  # Tiempo total de simulación
+    total_time = 75  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
 
 
@@ -117,7 +100,15 @@ def main():
         bodies = [
             Body(mass=1, position=[-1, 0], velocity=[0.2, 0.3]),
             Body(mass=1.5, position=[1, 0], velocity=[0.2, 0.3]),
-            Body(mass=1.6, position=[0, 1], velocity=[0.2, 0.2])
+            #Body(mass=1.6, position=[0, 1], velocity=[0.2, 0.2])
+        ]
+        return bodies
+    
+    def lagrange():
+        bodies = [
+            Body(mass=5, position=[-3, 0], velocity=[math.sqrt(3)/2, -0.5]),
+            Body(mass=5, position=[3, 0], velocity=[0, 1]),
+            Body(mass=5, position=[0, 3*math.sqrt(3)], velocity=[-math.sqrt(3)/2, -0.5])
         ]
         return bodies
 
@@ -127,9 +118,8 @@ def main():
     parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
     thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    parallel_handler2 = ParallelHandler(N=10, G=G, softening=.3)
 
-    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=thread_handler)
+    simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=parallel_handler)
 
     # Ejecutar la simulación
     simulation_runner.run(measure_time=measure_time)
@@ -140,7 +130,7 @@ def main():
 
     # Visualizar los resultados de la simulación
     print("Displaying simulation...")
-    simulation_runner.visualize(save=False, speed_factor=15)
+    simulation_runner.visualize(save=True, speed_factor=10)
 
 
 if __name__ == "__main__":
