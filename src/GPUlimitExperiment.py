@@ -27,7 +27,7 @@ class GPULimitExperiment:
 
     def plot_results(self):
         plt.figure(figsize=(10, 6))
-        plt.scatter(self.num_bodies_list, self.refresh_times, label='Datos')
+        plt.scatter(self.num_bodies_list, self.refresh_times, label='Data')
 
         # Ajustar una recta a los datos
         model = LinearRegression()
@@ -35,11 +35,10 @@ class GPULimitExperiment:
         model.fit(x, self.refresh_times)
         y_pred = model.predict(x)
 
-        plt.plot(self.num_bodies_list, y_pred, color='red', label='Recta ajustada')
+        plt.plot(self.num_bodies_list, y_pred, color='red', label='Best-fit curve')
 
-        plt.xlabel('Número de cuerpos')
-        plt.ylabel('Tiempo de refresco promedio (ms)')
-        plt.title('Límite de la GPU vs Número de cuerpos')
+        plt.xlabel('Number of Bodies')
+        plt.ylabel('Avergage Update Time (ms)')
         plt.legend()
         plt.tight_layout()
         plt.savefig("./experiments/GPU_limit.png")
@@ -53,7 +52,7 @@ class GPULimitExperiment:
 
 def main() -> None:
     # Ejemplo de uso
-    num_bodies_list = [100, 1000, 10000, 100000, 100000]
+    num_bodies_list = np.arange(50, 50050, 50)
     simulation_time = 1  # Tiempo de simulación en milisegundos (1 segundo)
 
     experiment = GPULimitExperiment(num_bodies_list, simulation_time)
