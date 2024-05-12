@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from simulate import SimulationRunner
 from sequential_handler import SequentialHandler
 from parallel_handler import ParallelHandler
-from concurrent_handler import ConcurrentProcessHandler, ConcurrentThreadHandler
+from concurrent_handler import ConcurrentThreadHandler
 from body import Body
 import numpy as np
 
@@ -12,7 +12,6 @@ class Experiment:
         self.output_path = output_path
         self.seq_results = []
         self.cuda_results = []
-        self.process_results = []
         self.thread_results = []
 
     def run_experiment(self, N_range: range, G: float, dt: float, total_time: int, handler) -> None:

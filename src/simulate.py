@@ -1,6 +1,6 @@
 from sequential_handler import SequentialHandler
 from parallel_handler import ParallelHandler
-from concurrent_handler import ConcurrentProcessHandler, ConcurrentThreadHandler
+from concurrent_handler import ConcurrentThreadHandler
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from tqdm import tqdm
@@ -83,7 +83,7 @@ class SimulationRunner:
 def main():
     G = 1  # Constante gravitacional
     dt = 0.01  # Paso de tiempo
-    total_time = 75  # Tiempo total de simulación
+    total_time = 50  # Tiempo total de simulación
     measure_time = False  # Flag para medir el tiempo de ejecución
 
 
@@ -115,8 +115,7 @@ def main():
     bodies = three_particles()
     # Crear e inicializar el runner de la simulación
     seq_handler = SequentialHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
-    process_handler = ConcurrentProcessHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
+    parallel_handler = ParallelHandler(N=len(bodies), G=G, bodies=bodies, softening=0.3)
     thread_handler = ConcurrentThreadHandler(N=len(bodies), G=G, bodies=bodies, softening=.3)
 
     simulation_runner = SimulationRunner(dt=dt, total_time=total_time, simulationHandler=parallel_handler)
